@@ -1,13 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { reservationSchema } from "@/lib/validators";
+import { formatZodError } from "@/lib/errors";
 
-
-const reservationSchema = z.object({
-  productId: z.string().min(1),
-  warehouseId: z.string().min(1),
-  quantity: z.number().int().positive(),
-});
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,13 +15,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: "Invalid request body",
-          details:
-            parsed.error.issues.map(
-              (issue) => ({
-                field: issue.path.join("."),
-                message: issue.message,
-              })
-            ),
+          details: formatZodError(
+            parsed.error
+          ),
         },
         { status: 400 }
       );

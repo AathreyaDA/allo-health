@@ -1,11 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { reservationParamsSchema } from "@/lib/validators";
+import { formatZodError } from "@/lib/errors";
 
-
-const paramsSchema = z.object({
-  id: z.string().min(1),
-});
 
 export async function GET(
   req: NextRequest,
@@ -15,7 +12,7 @@ export async function GET(
     const rawParams = await params;
 
 const parsedParams =
-  paramsSchema.safeParse(rawParams);
+  reservationParamsSchema.safeParse(rawParams);
 
   if (!parsedParams.success) {
     return NextResponse.json(
