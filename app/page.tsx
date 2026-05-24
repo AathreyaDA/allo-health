@@ -17,6 +17,8 @@ import { Badge } from "@/components/ui/badge";
 
 import { toast } from "sonner";
 
+import { ThemeToggle } from "@/components/theme-toggle";
+
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -76,24 +78,42 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-muted/40 p-8">
+    <main className="min-h-screen bg-gradient-to-br from-background via-background to-violet-950/10 p-8">
       <div className="max-w-5xl mx-auto space-y-8">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">
-            Inventory Reservation System
-          </h1>
+        <div className="flex items-start justify-between">
+          <div className="space-y-3">
+            <h1 className="text-5xl font-black tracking-tight bg-gradient-to-r from-violet-500 to-rose-600 bg-clip-text text-transparent">
+              Inventory Reservation System
+            </h1>
 
-          <p className="text-muted-foreground">
-            Reserve inventory across warehouses
-            with real-time stock tracking.
-          </p>
+            <p className="text-muted-foreground text-lg">
+              Real-time warehouse inventory
+              reservation with transactional
+              locking.
+            </p>
+          </div>
+
+          <ThemeToggle />
         </div>
 
         <div className="grid gap-6">
           {products.map((product) => (
-            <Card key={product.id}>
+            <Card
+              key={product.id}
+              className="
+                border-white/10
+                bg-background/70
+                backdrop-blur
+                shadow-2xl
+                shadow-black/10
+                transition-all
+                duration-300
+                hover:shadow-violet-500/10
+                hover:-translate-y-1
+              "
+            >
               <CardHeader>
-                <CardTitle>
+                <CardTitle className="text-2xl">
                   {product.name}
                 </CardTitle>
 
@@ -112,10 +132,18 @@ export default function HomePage() {
                     return (
                       <div
                         key={inventory.id}
-                        className="flex items-center justify-between rounded-lg border p-4"
+                        className="
+                          flex items-center justify-between
+                          rounded-xl border border-white/10
+                          bg-muted/30
+                          p-4
+                          transition-all
+                          duration-200
+                          hover:bg-muted/50
+                        "
                       >
                         <div className="space-y-1">
-                          <p className="font-medium">
+                          <p className="font-semibold text-lg">
                             {
                               inventory.warehouse
                                 .name
@@ -132,6 +160,11 @@ export default function HomePage() {
 
                         <div className="flex items-center gap-4">
                           <Badge
+                            className={
+                              available > 0
+                                ? "bg-rose-600 hover:bg-rose-600 text-white"
+                                : ""
+                            }
                             variant={
                               available > 0
                                 ? "default"
@@ -145,14 +178,25 @@ export default function HomePage() {
                             onClick={() =>
                               reserve(
                                 product.id,
-                                inventory.warehouse
-                                  .id
+                                inventory
+                                  .warehouse.id
                               )
                             }
                             disabled={
                               loading ||
                               available <= 0
                             }
+                            className="
+                              bg-violet-600
+                              hover:bg-violet-500
+                              transition-all
+                              duration-200
+                              hover:scale-105
+                              active:scale-95
+                              shadow-lg
+                              shadow-violet-500/20
+                              text-white
+                            "
                           >
                             Reserve
                           </Button>
