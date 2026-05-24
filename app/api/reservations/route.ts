@@ -1,22 +1,42 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+
+const reservationSchema = z.object({
+  productId: z.string().min(1),
+  warehouseId: z.string().min(1),
+  quantity: z.number().int().positive(),
+});
 
 export async function POST(req: NextRequest) {
   try {
-    const body: {
-    productId: string;
-    warehouseId: string;
-    quantity: number;
-    } = await req.json();
+    const body = await req.json();
 
-    const { productId, warehouseId, quantity } = body;
+    const parsed =
+      reservationSchema.safeParse(body);
 
-    if (!productId || !warehouseId || !quantity) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        {
+          error: "Invalid request body",
+          details:
+            parsed.error.issues.map(
+              (issue) => ({
+                field: issue.path.join("."),
+                message: issue.message,
+              })
+            ),
+        },
         { status: 400 }
       );
     }
+
+    const {
+      productId,
+      warehouseId,
+      quantity,
+    } = parsed.data;
 
     const result = await prisma.$transaction(async (tx) => {
       const inventoryRows = await tx.$queryRawUnsafe<
