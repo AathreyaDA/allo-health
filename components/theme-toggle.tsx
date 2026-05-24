@@ -12,13 +12,15 @@ export function ThemeToggle() {
     <Button
       variant="outline"
       size="icon"
-      onClick={() =>
-        setTheme(
-          theme === "dark"
-            ? "light"
-            : "dark"
-        )
-      }
+      onClick={() => {
+        document.startViewTransition(() => {
+          setTheme(
+            theme === "dark"
+              ? "light"
+              : "dark"
+          );
+        });
+      }}
       className="rounded-full"
     >
       {theme === "dark" ? (
