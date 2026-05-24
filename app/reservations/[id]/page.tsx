@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 import {
   Card,
@@ -161,137 +162,180 @@ export default function ReservationPage() {
   }
 
   return (
-    <main className="min-h-screen bg-muted/40 p-8">
-      <div className="max-w-2xl mx-auto">
-        <Card>
-          <CardHeader className="space-y-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-3xl">
-                Reservation Checkout
-              </CardTitle>
+    <main className="min-h-screen bg-gradient-to-br from-background via-background to-violet-950/10 p-8">
+        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="flex justify-end">
+            <ThemeToggle />
+        </div>
 
-              <Badge
-                variant={
-                  reservation.status ===
-                  "CONFIRMED"
-                    ? "default"
+        <Card
+            className="
+            border-white/10
+            bg-background/70
+            backdrop-blur
+            shadow-2xl
+            shadow-black/20
+            "
+        >
+            <CardHeader className="space-y-4">
+            <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                <CardTitle className="text-4xl font-black tracking-tight bg-gradient-to-r from-violet-500 to-rose-500 bg-clip-text text-transparent">
+                    Reservation Checkout
+                </CardTitle>
+
+                <p className="text-muted-foreground">
+                    Confirm or release your
+                    inventory reservation.
+                </p>
+                </div>
+
+                <Badge
+                className={
+                    reservation.status ===
+                    "CONFIRMED"
+                    ? "bg-violet-500 text-white"
                     : reservation.status ===
                         "RELEASED"
-                      ? "secondary"
-                      : "outline"
+                        ? "bg-rose-600 text-white"
+                        : "bg-zinc-700 text-white"
                 }
-              >
+                >
                 {reservation.status}
-              </Badge>
+                </Badge>
             </div>
-          </CardHeader>
+            </CardHeader>
 
-          <CardContent className="space-y-6">
+            <CardContent className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-lg border p-4 space-y-1">
+                <div className="rounded-xl border border-white/10 bg-muted/20 p-4 space-y-1">
                 <p className="text-sm text-muted-foreground">
-                  Product
+                    Product
                 </p>
 
-                <p className="font-semibold">
-                  {reservation.product.name}
+                <p className="font-semibold text-lg">
+                    {reservation.product.name}
                 </p>
-              </div>
+                </div>
 
-              <div className="rounded-lg border p-4 space-y-1">
+                <div className="rounded-xl border border-white/10 bg-muted/20 p-4 space-y-1">
                 <p className="text-sm text-muted-foreground">
-                  Warehouse
+                    Warehouse
                 </p>
 
-                <p className="font-semibold">
-                  {
-                    reservation.warehouse
-                      .name
-                  }
+                <p className="font-semibold text-lg">
+                    {reservation.warehouse.name}
                 </p>
-              </div>
+                </div>
 
-              <div className="rounded-lg border p-4 space-y-1">
+                <div className="rounded-xl border border-white/10 bg-muted/20 p-4 space-y-1">
                 <p className="text-sm text-muted-foreground">
-                  Quantity
+                    Quantity
                 </p>
 
-                <p className="font-semibold">
-                  {reservation.quantity}
+                <p className="font-semibold text-lg">
+                    {reservation.quantity}
                 </p>
-              </div>
+                </div>
 
-              <div className="rounded-lg border p-4 space-y-1">
+                <div className="rounded-xl border border-white/10 bg-muted/20 p-4 space-y-1">
                 <p className="text-sm text-muted-foreground">
-                  Reservation ID
+                    Reservation ID
                 </p>
 
-                <p className="font-mono text-sm truncate">
-                  {reservation.id}
+                <p className="font-mono text-xs truncate">
+                    {reservation.id}
                 </p>
-              </div>
+                </div>
             </div>
 
             {reservation.status ===
-              "PENDING" && (
-              <div className="rounded-xl border bg-background p-6 space-y-4">
-                <div className="space-y-2 text-center">
-                  <p className="text-sm text-muted-foreground">
+                "PENDING" && (
+                <div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-8 space-y-6">
+                <div className="space-y-3 text-center">
+                    <p className="text-muted-foreground">
                     Reservation expires in
-                  </p>
+                    </p>
 
-                  <p className="text-5xl font-bold tracking-tight">
+                    <p className="text-6xl font-black tracking-tight text-violet-400">
                     {formatTime(timeLeft)}
-                  </p>
+                    </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Button
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <Button
                     onClick={
-                      confirmReservation
+                        confirmReservation
                     }
-                    className="flex-1"
                     disabled={timeLeft <= 0}
-                  >
+                    className="
+                        flex-1
+                        bg-violet-600
+                        hover:bg-violet-500
+                        text-white
+                        transition-all
+                        duration-200
+                        hover:scale-[1.02]
+                        active:scale-[0.98]
+                        shadow-lg
+                        shadow-violet-500/20
+                    "
+                    >
                     Confirm Purchase
-                  </Button>
+                    </Button>
 
-                  <Button
+                    <Button
                     variant="destructive"
                     onClick={
-                      cancelReservation
+                        cancelReservation
                     }
-                    className="flex-1"
-                  >
+                    className="
+                        flex-1
+                        bg-rose-600
+                        hover:bg-rose-500
+                        text-white
+                        transition-all
+                        duration-200
+                        hover:scale-[1.02]
+                        active:scale-[0.98]
+                        shadow-lg
+                        shadow-rose-500/20
+                    "
+                    >
                     Cancel Reservation
-                  </Button>
+                    </Button>
                 </div>
-              </div>
+                </div>
             )}
 
             {reservation.status !==
-              "PENDING" && (
-              <div className="rounded-lg border p-6 text-center">
-                <p className="text-lg font-semibold">
-                  Reservation completed
+                "PENDING" && (
+                <div className="rounded-xl border border-white/10 bg-muted/20 p-8 text-center space-y-2">
+                <p className="text-2xl font-bold">
+                    Reservation Completed
                 </p>
 
-                <p className="text-muted-foreground mt-1">
-                  This reservation is no
-                  longer active.
+                <p className="text-muted-foreground">
+                    This reservation is no
+                    longer active.
                 </p>
-              </div>
+                </div>
             )}
 
             <Button
-              variant="outline"
-              onClick={() => router.push("/")}
+                variant="outline"
+                onClick={() => router.push("/")}
+                className="
+                transition-all
+                duration-200
+                hover:scale-[1.02]
+                "
             >
-              Back to Products
+                Back to Products
             </Button>
-          </CardContent>
+            </CardContent>
         </Card>
-      </div>
+        </div>
     </main>
-  );
+    );
 }
