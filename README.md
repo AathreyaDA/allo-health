@@ -1,36 +1,227 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Inventory Reservation System
 
-## Getting Started
+A full-stack inventory reservation system built with Next.js, Prisma, PostgreSQL, and NeonDB.
 
-First, run the development server:
+This project implements transactional inventory reservations with expiration handling, reservation confirmation/release flows, and concurrency-safe stock management.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Live Demo
+
+Deployment:
+[https://allo-inventory-one-kappa.vercel.app](https://allo-inventory-one-kappa.vercel.app/)
+
+Repository:
+https://github.com/AathreyaDA/allo-health
+
+## Features
+
+- Real-time inventory reservation system
+- Multi-warehouse inventory tracking
+- Reservation expiration handling
+- Atomic stock reservation using database transactions
+- Concurrency-safe inventory locking with `FOR UPDATE`
+- Reservation confirmation and release flows
+- Automatic expired reservation cleanup
+- Zod request validation
+- Dark/light theme UI
+- Fully deployed on Vercel
+
+---
+
+## Tech Stack
+
+### Frontend
+- Next.js 15
+- React 19
+- Tailwind CSS v4
+- shadcn/ui
+- Sonner
+- next-themes
+
+### Backend
+- Next.js Route Handlers
+- Prisma ORM
+- PostgreSQL
+- NeonDB
+
+### Validation & Utilities
+- Zod
+
+---
+
+## Architecture Decisions
+
+### Why Transactions?
+
+Reservation creation, confirmation, and release operations are wrapped in Prisma transactions to ensure stock consistency.
+
+This prevents:
+- negative inventory
+- double reservations
+- inconsistent stock states
+
+---
+
+### Why Row Locking (`FOR UPDATE`)?
+
+During reservation creation, inventory rows are locked using:
+
+```sql
+SELECT * FROM "Inventory"
+WHERE ...
+FOR UPDATE
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This prevents race conditions where multiple users attempt to reserve the same stock simultaneously.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Without row locking:
+- two requests could read the same available stock
+- both could reserve successfully
+- inventory would become inconsistent
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Reservation Lifecycle
 
-To learn more about Next.js, take a look at the following resources:
+Reservations begin in a `PENDING` state.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+They can then transition into:
+- `CONFIRMED`
+- `RELEASED`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Reservations also contain an expiration timestamp.
 
-## Deploy on Vercel
+If a reservation expires:
+- confirmation is rejected
+- reserved stock is automatically released
+- reservation state changes to `RELEASED`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Expired Reservation Cleanup
+
+The system includes a cleanup route for abandoned reservations.
+
+This handles scenarios where:
+- users close the tab
+- users never confirm or release reservations
+
+Additionally, confirmation requests automatically release expired reservations if encountered.
+
+---
+
+## API Routes
+
+### Products
+
+#### `GET /api/products`
+
+Returns all products with warehouse inventory information.
+
+---
+
+### Reservations
+
+#### `POST /api/reservations`
+
+Creates a reservation.
+
+Request body:
+
+```json
+{
+  "productId": "string",
+  "warehouseId": "string",
+  "quantity": 1
+}
+```
+
+#### `GET /api/reservations/[id]`
+
+Returns reservation details.
+
+---
+
+#### `POST /api/reservations/[id]/confirm`
+
+Confirms a reservation and deducts stock.
+
+---
+
+#### `POST /api/reservations/[id]/release`
+
+Releases a reservation and restores reserved inventory.
+
+---
+
+#### `POST /api/cleanup-expired`
+
+Releases expired pending reservations.
+
+---
+
+## Validation
+
+Request validation is implemented using Zod.
+
+Validation schemas are centralized in:
+
+```txt
+lib/validators.ts
+```
+
+Zod errors are formatted consistently through:
+
+```txt
+lib/errors.ts
+```
+### Setup environment variables
+
+Create a `.env` file:
+
+```env
+DATABASE_URL=your_database_url
+DIRECT_URL=your_direct_database_url
+```
+
+### Run Prisma migrations
+
+```bash
+npx prisma migrate dev
+```
+
+### Seed database
+```bash
+npx prisma db seed
+```
+
+### Start development server
+```bash
+npm run dev
+```
+
+## Deployment
+
+The application is deployed on Vercel.
+
+Environment variables required:
+- `DATABASE_URL`
+- `DIRECT_URL`
+
+---
+
+## Future Improvements
+
+- Idempotency keys for reservation creation
+- Background cron-based cleanup scheduling
+- Authentication and user accounts
+- Reservation analytics dashboard
+- WebSocket-based live inventory updates
+- Maybe not expose the "reserve" logic to the users and let the front end allow them to buy like their usual experience with other sites.
+---
+
+
+## Author
+
+Aathreya D A
