@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
 
       const expiresAt = new Date(
         Date.now() + 10 * 60 * 1000
+        //For expiry test: Date.now() + 15 * 1000
       );
 
       const reservation = await tx.reservation.create({
