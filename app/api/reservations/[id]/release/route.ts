@@ -1,12 +1,32 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { reservationParamsSchema } from "@/lib/validators";
+import { formatZodError } from "@/lib/errors";
 
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const rawParams = await params;
+    const parsedParams =
+      reservationParamsSchema.safeParse(
+        rawParams
+      );
+
+    if (!parsedParams.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid reservation ID",
+          details: formatZodError(
+            parsedParams.error
+          ),
+        },
+        { status: 400 }
+      );
+    }
+
+    const { id } = parsedParams.data;
 
     const result = await prisma.$transaction(async (tx) => {
       const reservation = await tx.reservation.findUnique({
