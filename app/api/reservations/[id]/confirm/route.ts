@@ -49,8 +49,44 @@ export async function POST(
       }
 
       if (reservation.expiresAt < new Date()) {
+        const inventory =
+          await tx.inventory.findFirst({
+            where: {
+              productId:
+                reservation.productId,
+              warehouseId:
+                reservation.warehouseId,
+            },
+          });
+
+        if (!inventory) {
+          throw new Error(
+            "Inventory not found"
+          );
+        }
+
+        await tx.inventory.update({
+          where: {
+            id: inventory.id,
+          },
+          data: {
+            reservedStock: {
+              decrement:
+                reservation.quantity,
+            },
+          },
+        });
+
+        await tx.reservation.update({
+          where: { id },
+          data: {
+            status: "RELEASED",
+          },
+        });
+
         return {
-          error: "Reservation expired",
+          error:
+            "Reservation expired and released",
           status: 410,
         };
       }
